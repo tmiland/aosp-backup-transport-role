@@ -16,12 +16,14 @@ voicemail permissions and `EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS`).
 - [design.md](design.md) — the proposal: role semantics, permission change,
   transport trust, consent UX, security model, test plan, patch outline.
 - [issue.md](issue.md) — the text intended for the AOSP issue tracker.
-- `patch/` — reference patch (in progress; AOSP Gerrit RFC).
+- [patch/](patch/) — reference patch (four commits), compile-checked on
+  `android-latest-release` (`android17-release`).
 
 ## Status
 
-Draft, not yet filed. The AOSP issue and the reference patch will be linked here
-once published.
+Draft, not yet filed. The reference patch compiles; the AOSP issue is not filed
+yet. See [patch/README.md](patch/README.md) for the base, apply order and known
+RFC caveats.
 
 ## Why
 

@@ -1,0 +1,123 @@
+From 976a57a626522aa1e1f89d812c860071ec81e266 Mon Sep 17 00:00:00 2001
+From: "tmiland-lab[bot]" <326116980+tmiland-lab[bot]@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 21:24:22 +0100
+Subject: [PATCH 2/2] role: define the backup transport role
+
+Define android.app.role.BACKUP_TRANSPORT with a required
+android.backup.TRANSPORT_HOST service, grant BACKUP on role grant, and add
+the consent strings and behavior class.
+
+Bug: 0
+Test: m PermissionController
+Change-Id: Ibaf8ac28937fba7ea6bc1cb0b1bc179554683d3e
+---
+ PermissionController/res/values/strings.xml   |  8 ++++
+ PermissionController/res/xml/roles.xml        | 28 +++++++++++++
+ .../behavior/BackupTransportRoleBehavior.java | 41 +++++++++++++++++++
+ 3 files changed, 77 insertions(+)
+ create mode 100644 PermissionController/role-controller/java/com/android/role/controller/behavior/BackupTransportRoleBehavior.java
+
+diff --git a/PermissionController/res/values/strings.xml b/PermissionController/res/values/strings.xml
+index 2254a73d77..4e2a9e4318 100644
+--- a/PermissionController/res/values/strings.xml
++++ b/PermissionController/res/values/strings.xml
+@@ -2280,4 +2280,12 @@
+     <string name="request_location_button_permissions_dialog_subtitle">When you share, this app will have access to precise location until you close the app</string>
+ 
+     <!-- END LOCATION BUTTON GRANT DIALOG -->
++
++    <!-- Backup transport role -->
++    <string name="role_backup_transport_label">Backup app</string>
++    <string name="role_backup_transport_short_label">Backup</string>
++    <string name="role_backup_transport_description">Apps that can back up your device data</string>
++    <string name="role_backup_transport_request_title">Set <xliff:g id="app_name" example="Backup">%1$s</xliff:g> as your backup app?</string>
++    <string name="role_backup_transport_request_description">This app will be able to read and store the data of apps that allow backup, including SMS, call log and contacts where the system includes them.</string>
++    <string name="role_backup_transport_search_keywords">backup,restore</string>
+ </resources>
+diff --git a/PermissionController/res/xml/roles.xml b/PermissionController/res/xml/roles.xml
+index dadfd1bf3a..e893f7f262 100644
+--- a/PermissionController/res/xml/roles.xml
++++ b/PermissionController/res/xml/roles.xml
+@@ -2178,4 +2178,32 @@
+             <permission name="android.permission.SET_TIME_ZONE" />
+         </permissions>
+     </role>
++    <!--
++        A role for the system backup transport.
++
++        The role holder is used as the backup transport and is granted the BACKUP permission.
++        It must declare a service with an intent filter for android.backup.TRANSPORT_HOST.
++    -->
++    <role
++        name="android.app.role.BACKUP_TRANSPORT"
++        behavior="BackupTransportRoleBehavior"
++        description="@string/role_backup_transport_description"
++        exclusive="true"
++        exclusivity="user"
++        label="@string/role_backup_transport_label"
++        requestDescription="@string/role_backup_transport_request_description"
++        requestTitle="@string/role_backup_transport_request_title"
++        searchKeywords="@string/role_backup_transport_search_keywords"
++        shortLabel="@string/role_backup_transport_short_label">
++        <required-components>
++            <service>
++                <intent-filter>
++                    <action name="android.backup.TRANSPORT_HOST" />
++                </intent-filter>
++            </service>
++        </required-components>
++        <permissions>
++            <permission name="android.permission.BACKUP" />
++        </permissions>
++    </role>
+ </roles>
+diff --git a/PermissionController/role-controller/java/com/android/role/controller/behavior/BackupTransportRoleBehavior.java b/PermissionController/role-controller/java/com/android/role/controller/behavior/BackupTransportRoleBehavior.java
+new file mode 100644
+index 0000000000..0b974b321d
+--- /dev/null
++++ b/PermissionController/role-controller/java/com/android/role/controller/behavior/BackupTransportRoleBehavior.java
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (C) 2026 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.role.controller.behavior;
++
++import android.content.Context;
++import android.os.UserHandle;
++
++import androidx.annotation.NonNull;
++
++import com.android.role.controller.model.Role;
++import com.android.role.controller.model.RoleBehavior;
++
++/**
++ * Class for behavior of the backup transport role.
++ *
++ * <p>The role is granted to an app that declares a service with an intent filter for
++ * {@code android.backup.TRANSPORT_HOST}. Registration of the transport itself is handled by
++ * {@code TransportManager} in the system server.
++ */
++public class BackupTransportRoleBehavior implements RoleBehavior {
++
++    @Override
++    public boolean isAvailableAsUser(@NonNull Role role, @NonNull UserHandle user,
++            @NonNull Context context) {
++        return true;
++    }
++}
+-- 
+2.47.3
+

@@ -1,0 +1,32 @@
+From a6bd52686ba57d7452d3c2332a5eb22aa870407e Mon Sep 17 00:00:00 2001
+From: "tmiland-lab[bot]" <326116980+tmiland-lab[bot]@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 21:24:22 +0100
+Subject: [PATCH 1/2] backup: add role flag to BACKUP permission
+
+Allow the BACKUP permission to be granted to the holder of a role via the
+existing PROTECTION_FLAG_ROLE mechanism. This is a prerequisite for a
+user-grantable backup transport role.
+
+Bug: 0
+Test: m framework-minus-apex
+Change-Id: Ib7c8cab20629852294ce458de3fb8669175fd635
+---
+ core/res/AndroidManifest.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/res/AndroidManifest.xml b/core/res/AndroidManifest.xml
+index 20556db3bed4..8b518141b775 100644
+--- a/core/res/AndroidManifest.xml
++++ b/core/res/AndroidManifest.xml
+@@ -7889,7 +7889,7 @@
+     <p>Not for use by third-party applications.
+          @hide pending API council -->
+     <permission android:name="android.permission.BACKUP"
+-        android:protectionLevel="signature|privileged" />
++        android:protectionLevel="signature|privileged|role" />
+ 
+     <!-- @SystemApi Allows an application to make modifications to device settings such that these
+          modifications will be overridden by settings restore..
+-- 
+2.47.3
+

@@ -1,0 +1,93 @@
+From 7e93dc01d1a010624976450d7bb84fbf36f4a1c7 Mon Sep 17 00:00:00 2001
+From: "tmiland-lab[bot]" <326116980+tmiland-lab[bot]@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 21:24:22 +0100
+Subject: [PATCH 2/2] backup: accept the backup transport role holder
+
+TransportManager currently only trusts transports that are on the system
+whitelist and privileged. Accept the current holder of
+android.app.role.BACKUP_TRANSPORT as well, keeping the whitelist path for
+OEM transports.
+
+Bug: 0
+Test: m framework-minus-apex
+Change-Id: Idefcdebbc4173c308f71ffc4410e65556c9b9547
+---
+ .../server/backup/TransportManager.java       | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/services/backup/java/com/android/server/backup/TransportManager.java b/services/backup/java/com/android/server/backup/TransportManager.java
+index d33bfecf1ba9..3f49e26b4378 100644
+--- a/services/backup/java/com/android/server/backup/TransportManager.java
++++ b/services/backup/java/com/android/server/backup/TransportManager.java
+@@ -26,6 +26,7 @@ import android.annotation.UserIdInt;
+ import android.annotation.WorkerThread;
+ import android.app.backup.BackupManager;
+ import android.app.backup.BackupTransport;
++import android.app.role.RoleManager;
+ import android.content.ComponentName;
+ import android.content.Context;
+ import android.content.Intent;
+@@ -35,6 +36,7 @@ import android.content.pm.PackageManager;
+ import android.content.pm.ResolveInfo;
+ import android.os.Bundle;
+ import android.os.RemoteException;
++import android.os.UserHandle;
+ import android.util.ArrayMap;
+ import android.util.ArraySet;
+ import android.util.Slog;
+@@ -69,6 +71,7 @@ public class TransportManager {
+ 
+     private final Intent mTransportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
+     private final @UserIdInt int mUserId;
++    private final Context mContext;
+     private final PackageManager mPackageManager;
+     private final Set<ComponentName> mTransportWhitelist;
+     private final TransportConnectionManager mTransportConnectionManager;
+@@ -96,6 +99,7 @@ public class TransportManager {
+     TransportManager(@UserIdInt int userId, Context context, Set<ComponentName> whitelist,
+             String selectedTransport) {
+         mUserId = userId;
++        mContext = context;
+         mPackageManager = context.getPackageManager();
+         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
+         mCurrentTransportName = selectedTransport;
+@@ -112,6 +116,7 @@ public class TransportManager {
+             String selectedTransport,
+             TransportConnectionManager transportConnectionManager) {
+         mUserId = userId;
++        mContext = context;
+         mPackageManager = context.getPackageManager();
+         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
+         mCurrentTransportName = selectedTransport;
+@@ -672,8 +677,11 @@ public class TransportManager {
+         }
+     }
+ 
+-    /** Transport has to be allowlisted and privileged. */
++    /** Transport has to be allowlisted and privileged, or be the backup transport role holder. */
+     private boolean isTransportTrusted(ComponentName transport) {
++        if (isBackupTransportRoleHolder(transport)) {
++            return true;
++        }
+         if (!mTransportWhitelist.contains(transport)) {
+             Slog.w(
+                     TAG,
+@@ -697,6 +705,15 @@ public class TransportManager {
+         return true;
+     }
+ 
++    private boolean isBackupTransportRoleHolder(ComponentName transport) {
++        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
++        if (roleManager == null) {
++            return false;
++        }
++        return roleManager.getRoleHoldersAsUser(RoleManager.ROLE_BACKUP_TRANSPORT,
++                UserHandle.of(mUserId)).contains(transport.getPackageName());
++    }
++
+     /**
+      * Tries to register transport represented by {@code transportComponent}.
+      *
+-- 
+2.47.3
+

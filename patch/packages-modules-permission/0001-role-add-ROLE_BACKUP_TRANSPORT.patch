@@ -1,0 +1,58 @@
+From 4e761b6d4fb36fa49e9122534fd76a1a04ba4c19 Mon Sep 17 00:00:00 2001
+From: "tmiland-lab[bot]" <326116980+tmiland-lab[bot]@users.noreply.github.com>
+Date: Thu, 29 Oct 2026 21:24:22 +0100
+Subject: [PATCH 1/2] role: add ROLE_BACKUP_TRANSPORT
+
+Add the role name for a user-grantable backup transport and update the
+current API surface.
+
+RFC: the constant is annotated with @SuppressLint("UnflaggedApi"); it must
+be put behind an aconfig flag before merging upstream.
+
+Bug: 0
+Test: m PermissionController
+Change-Id: I183933b18d9809d90a2d7192d44b328d89bdcf41
+---
+ framework-s/api/current.txt                        |  1 +
+ framework-s/java/android/app/role/RoleManager.java | 13 +++++++++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/framework-s/api/current.txt b/framework-s/api/current.txt
+index 8541e66934..739e2c8123 100644
+--- a/framework-s/api/current.txt
++++ b/framework-s/api/current.txt
+@@ -7,6 +7,7 @@ package android.app.role {
+     method public boolean isRoleAvailable(@NonNull String);
+     method public boolean isRoleHeld(@NonNull String);
+     field public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
++    field public static final String ROLE_BACKUP_TRANSPORT = "android.app.role.BACKUP_TRANSPORT";
+     field public static final String ROLE_BROWSER = "android.app.role.BROWSER";
+     field public static final String ROLE_CALL_REDIRECTION = "android.app.role.CALL_REDIRECTION";
+     field public static final String ROLE_CALL_SCREENING = "android.app.role.CALL_SCREENING";
+diff --git a/framework-s/java/android/app/role/RoleManager.java b/framework-s/java/android/app/role/RoleManager.java
+index 8e942c0d3a..a300de31cb 100644
+--- a/framework-s/java/android/app/role/RoleManager.java
++++ b/framework-s/java/android/app/role/RoleManager.java
+@@ -146,6 +146,19 @@ public final class RoleManager {
+      */
+     public static final String ROLE_NOTES = "android.app.role.NOTES";
+ 
++    /**
++     * The name of the backup transport role.
++     *
++     * <p>The holder of this role is used as the system backup transport and is granted
++     * {@link android.Manifest.permission#BACKUP}. It must declare a service with an intent
++     * filter for {@code android.backup.TRANSPORT_HOST}.
++     *
++     * @see android.app.backup.BackupTransport
++     */
++    // RFC: replace the suppression with an aconfig flag before merging upstream.
++    @SuppressLint("UnflaggedApi")
++    public static final String ROLE_BACKUP_TRANSPORT = "android.app.role.BACKUP_TRANSPORT";
++
+     /**
+      * The name of the Wallet role.
+      *
+-- 
+2.47.3
+

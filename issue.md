@@ -74,8 +74,8 @@ explicit warning, without requiring it to be a privileged system app.
 
 ## Attachments
 
-- Design note: role semantics, consent UI, security mitigations, test plan
-  (available on request / to be linked once published).
+- Design note: https://github.com/tmiland/aosp-backup-transport-role/blob/main/design.md
+  (role semantics, consent UI, security mitigations, test plan).
 - Reference patch outline: RoleManager constant, BackupTransportRoleBehavior,
   BACKUP protection level, TransportManager role check, Settings picker, CTS.
 - Prior art: Seedvault (github.com/seedvault-app/seedvault) — "compiled with the
